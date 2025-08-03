@@ -13,6 +13,7 @@ endif
 
 CURRENT_TIME = $(shell date +%Y%m%d_%H%M_%S)
 CURRENT_EXPERIMENT_DIR = $(EXPERIMENT_DIR)/$(CURRENT_TIME)_$(TOP)$(CONFIG_STR)
+# CURRENT_EXPERIMENT_DIR = $(EXPERIMENT_DIR)
 
 TOOL_RUN_CMD_FLAG = -batch
 PYTHON ?= python3
@@ -31,10 +32,11 @@ IS_CMD = 0
 
 run:
 	mkdir -p $(EXPERIMENT_DIR)
-	mkdir $(CURRENT_EXPERIMENT_DIR)
+	mkdir -p $(CURRENT_EXPERIMENT_DIR)
 	cp $(CONFIG_DIR)/$(CURR_CONFIG_FILE) $(CURRENT_EXPERIMENT_DIR)
 	cp formal/assumptions/$(TOP_MODULE)_di_asm.sv $(CURRENT_EXPERIMENT_DIR)
 	git log -1 > $(CURRENT_EXPERIMENT_DIR)/git_commit.txt
+	rm -rf $(CURRENT_EXPERIMENT_DIR)/jgproject
 	$(TOOL_CMD) -define isCmd $(IS_CMD)
 
 CMD_FLAG =
@@ -93,7 +95,7 @@ setup_formal:
 	echo "clock $(CLOCK_SIGNAL)" > $(OUT_DIR)/formal/scripts/clock.tcl
 	touch $(OUT_DIR)/formal/scripts/tasks/$(TOP)_symb_init_no_taint.tcl
 	mkdir -p $(OUT_DIR)/formal/properties/taint_conditions
-	$(JASPER_SERVER) "cd $(OUT_DIR); DESIGN_CONFIG=$(DESIGN_CONFIG) make run_cmd CONFIG=print_taint_states DESIGN_FILE=$(DESIGN_FILE) TOP=$(TOP)"
+	cd $(OUT_DIR); DESIGN_CONFIG=$(DESIGN_CONFIG) make run_cmd CONFIG=print_taint_states DESIGN_FILE=$(DESIGN_FILE) TOP=$(TOP)
 	$(PYTHON) $(PATH_TO_PY_SCRIPTS)/fpv_core_setup/fpv_core_setup.py --design_file $(DESIGN_FILE) --top_module $(TOP) --outdir $(OUT_DIR) --gen_symb_init=True --gen_taint_propagation_checker=True --target_tool=jasper --path_to_core=$(OUT_DIR) --gen_bind_and_mod=True
 	cp templates/design_ct_to.mk $(OUT_DIR)/configurations/$(TOP)_ct_to.mk
 	cp templates/design_ct_to_no_taint_states.mk $(OUT_DIR)/configurations/$(TOP)_ct_to_no_taint_states.mk
