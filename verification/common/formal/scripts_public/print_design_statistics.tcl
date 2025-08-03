@@ -1,1 +1,0 @@
-YOUR_FORMAL_TOOL_CMD print design statistics
