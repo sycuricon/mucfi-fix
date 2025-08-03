@@ -42,7 +42,7 @@ def yosys_cellift_and_find_fwd_mux(config, y_log_dir, cellift_find_mux_log, tain
         yscript_mod = y_log_dir / y_script
         with open (yscript_mod, "w") as f:
             f.write(yscript)
-        result = run_cmd(f"{str(Path(config["YOSYS_DIR"]) / "yosys")} -c {yscript_mod} > {cellift_find_mux_log}", print_stdout=False)
+        result = run_cmd(f"{str(Path(config['YOSYS_DIR']) / 'yosys')} -c {yscript_mod} > {cellift_find_mux_log}", print_stdout=False)
         return result.stderr
 
 def check_fwd_muxes(config, y_log, y_log_extra_mux_check):
@@ -125,8 +125,8 @@ def cellift_and_declassify(config, config_file, taint_tracking_method):
 
     d_out_dir = Path(config["OUT_DIR"]) / "designs"
     d_out_dir.mkdir(parents=True, exist_ok=True)
-    design_file = str(d_out_dir / f"cell{config["TAINT_TRACKING_METHOD"]}.v")
-    design_file_extra_mux = str(d_out_dir / f"cell{config["TAINT_TRACKING_METHOD"]}_extra_mux.v")
+    design_file = str(d_out_dir / f"cell{config['TAINT_TRACKING_METHOD']}.v")
+    design_file_extra_mux = str(d_out_dir / f"cell{config['TAINT_TRACKING_METHOD']}_extra_mux.v")
 
     y_err = yosys_cellift_and_find_fwd_mux(config, y_log_dir, y_log, taint_tracking_method, "cellift_and_find_fwd_mux.ys.tcl", design_file)
     y_err_extra_mux_check = yosys_cellift_and_find_fwd_mux(config, y_log_dir, y_log_extra_mux_check, taint_tracking_method, "find_extra_fwd_mux.ys.tcl", design_file_extra_mux)
@@ -203,7 +203,7 @@ def gen_uc_rs(config, taint_cond_path):
 def gen_uc_regrd_from_fwd(config, taint_cond_path):
     n = 1
     for regrd in config["REGISTER_READ_SIGNALS"].replace('"','').split(","):
-        uc_call = f"yosys update_condition -read-from-signals {config["FORWARDING_INPUT_BEFORE_REGREAD"]} -signal_name \"" + prep_signame_for_uc(regrd) + "\" -verbose\n"
+        uc_call = f"yosys update_condition -read-from-signals {config['FORWARDING_INPUT_BEFORE_REGREAD']} -signal_name \"" + prep_signame_for_uc(regrd) + "\" -verbose\n"
         design_with_uc = Path(config["OUT_DIR"]) / "yosys_passes" / f"design_uc_regrd{n}_from_fwd.v"
         yosys_gen_uc(f"uc_regrd{n}_from_fwd.ys.tcl", uc_call, design_with_uc, Path(config["OUT_DIR"]) / "yosys_passes" / f"uc_fwdrd_rs{n}.log")
         gen_taint_cond_file(design_with_uc, config["TOP_MODULE"], f"gen_fwdrd_rs{n}", taint_cond_path / f"uc_fwdrd_rs{n}.sv")
@@ -212,14 +212,14 @@ def gen_uc_regrd_from_fwd(config, taint_cond_path):
 def gen_uc_regrd_from_reg(config, taint_cond_path):
     n = 1
     for regrd in config["REGISTER_READ_SIGNALS"].replace('"','').split(","):
-        uc_call = f"yosys update_condition -read-from-signals {config["REGISTER_FILE"]} -signal_name \"" + prep_signame_for_uc(regrd) + "\" -verbose\n"
+        uc_call = f"yosys update_condition -read-from-signals {config['REGISTER_FILE']} -signal_name \"" + prep_signame_for_uc(regrd) + "\" -verbose\n"
         design_with_uc = Path(config["OUT_DIR"]) / "yosys_passes" / f"design_uc_regrd{n}_from_reg.v"
         yosys_gen_uc(f"uc_regrd{n}_from_reg.ys.tcl", uc_call, design_with_uc, Path(config["OUT_DIR"]) / "yosys_passes" / f"uc_regrd_rs{n}.log")
         gen_taint_cond_file(design_with_uc, config["TOP_MODULE"], f"gen_regrd_rs{n}", taint_cond_path / f"uc_regrd_rs{n}.sv")
         n += 1
 
 def gen_uc_iw(config, taint_cond_path):
-    uc_call = f"yosys update_condition -read-from-signals {config["INSTR_WORD"]} -signal_name {config["REG_ADDR"]} -verbose\n"
+    uc_call = f"yosys update_condition -read-from-signals {config['INSTR_WORD']} -signal_name {config['REG_ADDR']} -verbose\n"
     design_with_uc = Path(config["OUT_DIR"]) / "yosys_passes" / f"design_uc_iw.v"
     y_log = Path(config["OUT_DIR"]) / "yosys_passes" / f"uc_iw.log"
     yosys_gen_uc(f"uc_iw.ys.tcl", uc_call, design_with_uc, y_log)
@@ -246,7 +246,7 @@ def yosys_gen_uc(tcl_name, uc_call, design_with_uc, uc_log):
     uc_tcl_file = Path(config["OUT_DIR"]) / "yosys_passes" / tcl_name
     gen_uc_tcl(config, design_with_uc, uc_call, uc_tcl_file)
     #call yosys pass, generate the output file with the update condition
-    run_cmd(f"{str(Path(config["YOSYS_DIR"]) / "yosys")} -c {uc_tcl_file} > {uc_log}", print_stdout=False)
+    run_cmd(f"{str(Path(config['YOSYS_DIR']) / 'yosys')} -c {uc_tcl_file} > {uc_log}", print_stdout=False)
 
 def yosys_gen_taint_cond(config, add_read_from_fwd_input_condition):
     '''
