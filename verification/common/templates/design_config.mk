@@ -31,7 +31,7 @@ ifeq ($(VERIFICATION_TOOL),jasper)
 RESTORE_LAST_RUN = restore_last_run_jasper
 endif
 
-TOOL_CMD = YOUR_FORMAL_TOOL_CMD to launch formal tool -tcl $(VERIF_FILE) -proj $(CURRENT_EXPERIMENT_DIR)/jgproject \
+TOOL_CMD = jaspergold -tcl $(VERIF_FILE) -proj $(CURRENT_EXPERIMENT_DIR)/jgproject \
           -define experimentDir $(CURRENT_EXPERIMENT_DIR) \
           -define top $(TOP_MODULE) \
 					-define designFile $(DESIGN_FILE) \

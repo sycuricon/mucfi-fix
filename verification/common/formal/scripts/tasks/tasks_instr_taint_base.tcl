@@ -10,22 +10,24 @@ set taskName instr_taint_base
 # Assumptions:
 # ------------
 # Add all assumptions that describe the input protocol (if any)
-YOUR_FORMAL_TOOL_CMD create task/property group ${taskName} -copy ${propertyLocation}.asm_di.*
+task -create ${taskName} -copy ${propertyLocation}.asm_di_*
 # Add all input no taint assumptions
-YOUR_FORMAL_TOOL_CMD update task  ${taskName} -copy ${propertyLocation}.asm_no_taint_top.*
+task -edit ${taskName} -copy ${propertyLocation}.asm_no_taint_top_*
+
 
 # Declassification:
 # -----------------
 # declassify data that goes back to the register file (different signal in ibex non-/secure)
-#source "declass.tcl"
-source ${declassificationSigsFile}
+#include "declass.tcl"
+include ${declassificationSigsFile}
+
 
 
 # Sanity checks:
 # --------------
-YOUR_FORMAL_TOOL_CMD update task  ${taskName} -copy ${propertyLocation}.c_.*
-YOUR_FORMAL_TOOL_CMD update task  ${taskName} -copy ${propertyLocation}.as_sanity.*
-YOUR_FORMAL_TOOL_CMD update task  ${taskName} -copy ${propertyLocation}.as_sup.*
+task -edit ${taskName} -copy ${propertyLocation}.chk*
+task -edit ${taskName} -copy ${propertyLocation}.*.as_sanity_*
+task -edit ${taskName} -copy ${propertyLocation}.as_sup_*
 # -----------------------------------------------------------------------------
 
-source ../common/formal/scripts/tasks/task_creations.tcl
+include ../common/formal/scripts/tasks/task_creations.tcl

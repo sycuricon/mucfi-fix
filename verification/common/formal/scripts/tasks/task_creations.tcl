@@ -2,7 +2,7 @@ proc create_ucfi_task {taskname checkername instr_taint_base top propertyLocatio
   global symbInit
   global declassifiedSigs
 
-  source ../common/formal/scripts/instr_types.tcl
+  include ../common/formal/scripts/instr_types.tcl
 
   set name_suffixes {}
 
@@ -15,19 +15,19 @@ proc create_ucfi_task {taskname checkername instr_taint_base top propertyLocatio
     set taskName ${taskName}${suffix}
   }
 
-  YOUR_FORMAL_TOOL_CMD create task/group of properties  ${taskName} -copy_all -source_task ${instr_taint_base}
+  task -create ${taskName} -copy_all -source_task ${instr_taint_base}
 
   # Taint injection point
   if {$operand_sig ne ""} {
-    YOUR_FORMAL_TOOL_CMD abstract -task ${taskName} -signal_name "${operand_sig}"
+    stopat -task ${taskName} "${operand_sig}"
   }
 
   # Declassification:
   if {$declassify == 1} {
     foreach sig $declassifiedSigs {
-      YOUR_FORMAL_TOOL_CMD abstract -task ${taskName} -signal_name "${sig}"
+      stopat -task ${taskName} "${sig}"
     }
-    YOUR_FORMAL_TOOL_CMD add to task: ${taskName} -copy ${propertyLocation}.asm_declass_.*
+    task -edit ${taskName} -copy ${propertyLocation}.asm_declass_*
   }
 
   ###
@@ -43,15 +43,15 @@ proc create_ucfi_task {taskname checkername instr_taint_base top propertyLocatio
 
   set nrInitCyclesNoTaint 1
 
-  YOUR_FORMAL_TOOL_CMD assume -bound $nrInitCyclesNoTaint "${top}_fpv_bind.${checkername}.taint_active == 0" -name ${taskName}::"${checkername}_taint_active_0"
-  YOUR_FORMAL_TOOL_CMD assume -bound $nrInitCyclesNoTaint "${top}_fpv_bind.${checkername}.taint_start == 0" -name ${taskName}::"${checkername}_taint_start_0"
-  YOUR_FORMAL_TOOL_CMD assume -bound $nrInitCyclesNoTaint "${top}_fpv_bind.${checkername}.tainted_once == 0" -name ${taskName}::"${checkername}_taint_once_0"
+  assume -bound $nrInitCyclesNoTaint "${top}_fpv_bind.${checkername}.taint_active == 0" -name ${taskName}::"${checkername}_taint_active_0"
+  assume -bound $nrInitCyclesNoTaint "${top}_fpv_bind.${checkername}.taint_start == 0" -name ${taskName}::"${checkername}_taint_start_0"
+  assume -bound $nrInitCyclesNoTaint "${top}_fpv_bind.${checkername}.tainted_once == 0" -name ${taskName}::"${checkername}_taint_once_0"
 
 
   # this one may be used for debug: assume "${top}_fpv_bind.iuv_type == ${iuv_type}_TYPE"
 
   # Checker contains taint injection assumptions and property to check
-  YOUR_FORMAL_TOOL_CMD add to task ${taskName} -copy ${propertyLocation}.${checkername}..* -regexp
+  task -edit ${taskName} -copy ${propertyLocation}.${checkername}..* -regexp
 }
 # -----------------------------------------------------------------------------
 

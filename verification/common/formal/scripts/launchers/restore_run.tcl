@@ -2,9 +2,9 @@
 ## Run this script to restore a saved session.
 ## Do not run it while a session is running in the background, as this may corrupt the database and all results will be lost.
 
-# source ../common/formal/scripts/launchers/jasper_config.tcl
+# include ../common/formal/scripts/launchers/jasper_config.tcl
 
-source ../common/formal/scripts/procs.tcl
+include ../common/formal/scripts/procs.tcl
 
 YOUR_FORMAL_TOOL_CMD to restore session/database
 

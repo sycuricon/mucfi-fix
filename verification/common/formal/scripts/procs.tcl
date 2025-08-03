@@ -1,13 +1,13 @@
 proc save_db_expdir {experimentDir} {
   upvar $experimentDir experimentDirLocal
   #### Save setup and property status
-  YOUR_FORMAL_TOOL_CMD save database $experimentDirLocal/result.db
+  save -force $experimentDirLocal/result.db
 }
 
 proc save_db {} {
   global experimentDir
   #### Save setup and property status
-  YOUR_FORMAL_TOOL_CMD save database $experimentDirLocal/result.db
+  save -force $experimentDirLocal/result.db
 
 }
 
@@ -23,15 +23,15 @@ proc dump_result_per_prop {property_name} {
 
   # VCD = Value Change Dump
   if {[lsearch $statesWithViolation $propState] ne -1} {
-    YOUR_FORMAL_TOOL_CMD generate VCD for  ${property_name}
-    YOUR_FORMAL_TOOL_CMD and save it into $experimentDir/$vcdDir/$prop_name_wo_task.vcd
+    visualize -violation -property ${property_name}
+    visualize -save -vcd $experimentDir/$vcdDir/$prop_name_wo_task.vcd
   }
   if {[lsearch $statesWithWave $propState] ne -1} {
-    YOUR_FORMAL_TOOL_CMD generate VCD for ${property_name}
-    YOUR_FORMAL_TOOL_CMD and save it into $experimentDir/$vcdDir/$prop_name_wo_task.vcd
+    visualize -cover -property ${property_name}
+    visualize -save -vcd $experimentDir/$vcdDir/$prop_name_wo_task.vcd
   }
 
-  YOUR_FORMAL_TOOL_CMD generate report ${experimentDir}/$reportDir/jasper_report_${prop_name_wo_task}.txt
+  report ${experimentDir}/$reportDir/jasper_report_${prop_name_wo_task}.txt -force
   puts "Created report for property: $property_name"
 }
 
@@ -41,7 +41,7 @@ proc print_report_per_prop {property_name} {
 
   puts "Determined property: $property_name"
   set prop_name_wo_task [lindex [split ${property_name} "::" ] 2]
-  YOUR_FORMAL_TOOL_CMD generate report ${experimentDir}/$reportDir/jasper_report_${prop_name_wo_task}.txt
+  report ${experimentDir}/$reportDir/jasper_report_${prop_name_wo_task}.txt -force
   puts "Report done"
 }
 
@@ -128,8 +128,8 @@ proc prove_all_tasks {tasksToProve bg} {
   } else {
     set bgFlag ""
   }
-  foreach {prop} $tasksToProve {
-    YOUR_FORMAL_TOOL_CMD prove all propertyies in task: $prop $bgFlag
+  foreach {task} $tasksToProve {
+    prove -task $task $bgFlag
   }
 }
 
@@ -147,8 +147,8 @@ proc prove_all_props {propertyList on_determined_callback dumpVCD} {
   }
 
   foreach {prop} $propertyList {
-    YOUR_FORMAL_TOOL_CMD generate report once the property result is determined $on_determined_callback $bgFlag
-    YOUR_FORMAL_TOOL_CMD generate report -file ${experimentDir}/$reportDir/jasper_report.txt
+    prove -property $prop -on_determined $on_determined_callback $bgFlag
+    report -file ${experimentDir}/$reportDir/jasper_report.txt -force
   }
 }
 
@@ -184,8 +184,8 @@ proc prove_task {currTask dumpResultPerProperty dumpVCD bg} {
   global reportDir
 
   if {$dumpResultPerProperty == 0} {
-    YOUR_FORMAL_TOOL_CMD prove task: $currTask $bg
-    YOUR_FORMAL_TOOL_CMD to generate report -file ${experimentDir}/$reportDir/jasper_report.txt
+    prove -task $currTask $bg
+    report -file ${experimentDir}/$reportDir/jasper_report.txt -force
   } else {
     prove_all_props $propsPerTask($currTask) dump_result_per_prop_callback $dumpVCD
   }
@@ -196,7 +196,7 @@ proc prove_remaining_tasks {allProps allTasksToProve restartProves manualEngineI
   global reportDir
   set autoN 2
   set currAutoCnt 0
-  set engine_list {YOUR_FORMAL_TOOL_CMD all engines}
+  set engine_list {get_engine_mode}
   set nrEngines [llength $engine_list]
   set currEngine 0
 
@@ -211,9 +211,9 @@ proc prove_remaining_tasks {allProps allTasksToProve restartProves manualEngineI
 
       if {$manualEngineIteration == 1} {
         if {[expr $currAutoCnt % $autoN] == 0} {
-          YOUR_FORMAL_TOOL_CMD configure engine mode to automatically choose
+          set_engine_mode auto
         } else {
-          YOUR_FORMAL_TOOL_CMD configure engine mode to these engines: [lindex $engine_list $currEngine]
+          set_engine_mode [lindex $engine_list $currEngine]
 
           if {$currEngine == [expr $nrEngines - 1]} {
             set currEngine 0
@@ -225,7 +225,7 @@ proc prove_remaining_tasks {allProps allTasksToProve restartProves manualEngineI
       }
 
       prove_task $currTask  $dumpResultPerProperty $dumpVCD
-      YOUR_FORMAL_TOOL_CMD generate report -file ${experimentDir}/$reportDir/jasper_report.txt
+      report -file ${experimentDir}/$reportDir/jasper_report.txt -force
     }
   }
 }

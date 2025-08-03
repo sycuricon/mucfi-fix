@@ -41,9 +41,9 @@ if {$isCmd == 1} {
 # Note in case there are properties that run very long, this part will only be reached if $dumpVCD is 0, because otherwise the prove command is run in the foreground
 if {$isCmd == 1 && $dumpVCD == 0} {
   while {[all_props_determined [concat $allPropsToProve $allPropsToCover]] != 1} {
-    YOUR_FORMAL_TOOL_CMD generate report -file ${experimentDir}/$reportDir/jasper_report.txt
+    report -file ${experimentDir}/$reportDir/jasper_report.txt -force
     after [expr $reportInterval * 1000]
   }
 }
 
-YOUR_FORMAL_TOOL_CMD generate report -file ${experimentDir}/$reportDir/jasper_report_final.txt
+report -file ${experimentDir}/$reportDir/jasper_report_final.txt -force
